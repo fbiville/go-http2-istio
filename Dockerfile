@@ -3,6 +3,6 @@ FROM golang:1.12
 WORKDIR /go/src/app
 COPY . .
 ENV GO111MODULE=on
-RUN go build
+RUN go build ./pkg/server
 
-CMD ["./http2-server"]
+CMD ["./server"]
