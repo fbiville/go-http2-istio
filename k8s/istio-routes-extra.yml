@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: hello-http2-extra-vsvc
+spec:
+  hosts:
+  - "hello-http2.example.com"
+  gateways:
+  - hello-http2-gateway
+  http:
+  - match:
+    - headers:
+        content-type:
+          exact: application/json
+    route:
+    - destination:
+        port:
+          number: 81
+        host: hello-http2-extra-svc
