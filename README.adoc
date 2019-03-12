@@ -1,0 +1,53 @@
+= Istio experiments
+
+This repo experiments with Istio and dynamic routing.
+
+== Server image
+
+TIP: Make sure Istio is installed in your target Kubernetes cluster.
+
+The server is packaged in a Docker container.
+Just run:
+
+```console
+ $ docker build . -t my-http2-server
+ $ docker push REPO/USER/my-http2-server
+```
+
+== Experiments
+
+TIP: Make sure to update link:./k8s/pod.yml[the pod] to reference your Docker image.
+
+=== Goal
+
+The experiment aims to verify that several `VirtualService` resources can be defined for the same application.
+
+In this experiment, we define a misconfigured link:./k8s/istio-routes.yml[`VirtualService`] (`vsvc`) that matches incoming traffic by a specific `Authority` HTTP header value
+and re-routes it to a port. The link:./k8s/service.yml[`Service`] referenced by this `vscv` does NOT listen to the redirected port.
+
+We define another link:./k8s/istio-routes-extra.yml[`VirtualService`] that matches by `Content-Type` header value and also re-routes traffic to a
+port. This time, though, the `link:./k8s/service-extra.yml[`Service`] referenced by this `vscv` actually listens to the redirected port.
+
+link:./k8s/test.sh[The test script] properly deletes and recreates the resources and sends three HTTP requests:
+
+ 1. one that includes both the proper `Authority` and `Content-Type` values
+ 1. one that includes only the `Authority value`
+ 1. one that includes only the `Content-Type value`
+
+The first one MAY succeed, it depends on Istio's link:https://istio.io/help/ops/traffic-management/deploy-guidelines/#multiple-virtual-services-and-destination-rules-for-the-same-host[nondeterministic cross-resource rule merge order].
+
+The second one MUST always fail.
+
+The third one MUST always succeed.
+
+
+=== Run
+You can run:
+
+```console
+ $ cd k8s
+ $ ./test.sh
+```
+
+TIP: You can also observe the non-deterministic outcome of the first request by running the script in
+a loop: `for i in {1..5}; do echo "=== Try $i ==="; ./test.sh; done`
