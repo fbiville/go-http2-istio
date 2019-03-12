@@ -13,7 +13,7 @@ echo -e "# Creating resources"
 kubectl apply --filename . > /dev/null
 sleep 10
 
-cluster_ip=$(kubectl get service --all-namespaces | grep ingressgateway | tr -s ' ' | cut -d' ' -f5)
+cluster_ip=$(kubectl get service/istio-ingressgateway -n istio-system | tr -s ' ' | cut -d' ' -f4 | tail -n1)
 
 echo "# Curling"
 echo "## Authority + Content-Type"
